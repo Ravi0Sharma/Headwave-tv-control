@@ -1,0 +1,20 @@
+{
+  "model": "models/gesture_recognizer.task",
+  "camera": 0,
+  "width": 640,
+  "height": 480,
+  "confidence": 0.75,
+  "hold_seconds": 0.5,
+  "release_seconds": 0.35,
+  "cooldown_seconds": 1.0,
+  "adb_serial": "",
+  "gestures": {
+    "Open_Palm": "KEYCODE_MEDIA_PLAY_PAUSE",
+    "Closed_Fist": "KEYCODE_DPAD_CENTER",
+    "Thumb_Up": "KEYCODE_VOLUME_UP",
+    "Thumb_Down": "KEYCODE_VOLUME_DOWN",
+    "Victory": "KEYCODE_BACK",
+    "Pointing_Up": "KEYCODE_DPAD_UP",
+    "ILoveYou": "KEYCODE_HOME"
+  }
+}
