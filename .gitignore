@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.egg-info/
+build/
+dist/
+.DS_Store
+models/*.task
+models/*.json
+data/
+config.local.json
