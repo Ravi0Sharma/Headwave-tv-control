@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "headwave-tv-control"
+version = "0.1.0"
+description = "Develop hand gestures on macOS and control Google TV from Raspberry Pi"
+requires-python = ">=3.9,<3.13"
+dependencies = [
+  "mediapipe==0.10.18",
+  "numpy>=1.26.4,<2",
+  "opencv-contrib-python==4.10.0.84",
+]
+
+[project.scripts]
+headwave = "headwave.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
