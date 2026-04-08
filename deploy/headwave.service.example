@@ -1,0 +1,17 @@
+[Unit]
+Description=Headwave hand gesture TV control
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+# Replace USER and paths. Use the SAME user who ran headwave pair.
+User=USER
+WorkingDirectory=/home/USER/Headwave-tv-control
+ExecStart=/home/USER/Headwave-tv-control/.venv/bin/headwave run --config /home/USER/Headwave-tv-control/config.local.json --live --headless
+# Stop on camera/ADB failure; restart manually after checking the connection.
+Restart=no
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
