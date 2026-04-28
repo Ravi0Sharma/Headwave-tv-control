@@ -95,3 +95,86 @@ Installation and model execution were verified locally on Apple M4 with Python 3
 The Mac wheel's internal metadata names Intel despite containing ARM64 libraries,
 so `pip check` reported a platform mismatch in that environment; model execution succeeded.
 
+## Hardware: Raspberry Pi 5 + Camera Module 3
+
+| Component | Role |
+|---|---|
+| Raspberry Pi 5 | Runs recognition, filtering, and ADB locally. |
+| Camera Module 3 | Captures the user's hand. |
+| Pi 5 camera cable | Connects the camera's 15-pin socket to the Pi's 22-pin socket. |
+| Power supply and cooling | Support continuous image processing. |
+| microSD or another system drive | Stores Raspberry Pi OS 64-bit and the software. |
+| Ethernet, with Wi-Fi as backup | Connects the Pi to the TV's local network. |
+| Google TV device | Receives ADB key events. |
+
+Pi 5 has a quad-core 64-bit Cortex-A76 processor, Gigabit Ethernet, Wi-Fi, and two
+MIPI camera/display interfaces. Its specifications include 5 V/5 A USB-C power;
+active cooling is available for sustained workloads. Headwave's actual Pi frame
+rate has not been measured. [Raspberry Pi 5 specifications](https://www.raspberrypi.com/products/raspberry-pi-5/)
+
+Camera Module 3 uses an approximately 12 MP Sony IMX708 sensor with autofocus.
+The standard variant has a 75° diagonal field of view; Wide has 120°. Headwave's
+current test configuration requests 640 × 480 rather than full sensor resolution.
+[Camera Module 3 specifications](https://www.raspberrypi.com/products/camera-module-3/)
+
+### Connect the camera
+
+Shut down and disconnect Pi power before attaching the ribbon cable. Use the
+correct Pi 5 cable and follow the manufacturer's connector-orientation instructions.
+The wider standard cable used with older Pi boards does not fit Pi 5 directly.
+[Official camera connection guide](https://www.raspberrypi.com/documentation/accessories/camera.html)
+
+> **Photo to add later:** your Pi 5, Camera Module 3, and ribbon cable connection.
+
+### Camera support
+
+| Camera path | Status |
+|---|---|
+| Mac camera → OpenCV | Implemented; camera test started on Mac. |
+| Pi USB camera → OpenCV | Same implementation; Pi hardware verification pending. |
+| Camera Module 3 → Picamera2 | Planned adapter; not yet implemented in Headwave. |
+
+Camera Module 3 uses the libcamera/Picamera2 stack. The planned adapter will supply
+frames to the same subsequent OpenCV/MediaPipe processing. Changing the JSON camera
+index alone does not add Picamera2 support.
+
+Check the camera independently of Headwave first:
+
+```bash
+rpicam-hello --list-cameras
+rpicam-still --nopreview -o camera-test.jpg
+```
+
+If Picamera2 is missing:
+
+```bash
+sudo apt install python3-picamera2
+```
+
+Picamera2 and libcamera are tied to the system Python. We still need to verify their
+Python/NumPy compatibility with Headwave when implementing the adapter. Installing
+this package does not automatically expose it inside an isolated `.venv`.
+[Official camera software documentation](https://www.raspberrypi.com/documentation/computers/camera_software.html)
+
+### Install the current version on Pi: USB camera
+
+Use Raspberry Pi OS **64-bit**, preferably with Python 3.11. Bookworm includes 3.11.
+If your OS uses Python 3.13 or later, prepare a separate compatible environment;
+do not replace the system Python.
+
+Copy or clone the code, then install from the project directory on the Pi:
+
+```bash
+sudo apt update
+sudo apt install -y python3-venv python3-dev adb libgl1 libglib2.0-0 libportaudio2
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install .
+headwave download-model
+```
+
+Skip the final command if the model was copied from Mac. Copy `models/custom.json`
+separately if using custom poses. Create a fresh `.venv` on Pi; Mac binaries cannot
+be reused on Linux. The Mac does not need to remain running during Pi operation.
+
