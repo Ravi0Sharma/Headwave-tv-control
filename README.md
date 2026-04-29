@@ -178,3 +178,82 @@ Skip the final command if the model was copied from Mac. Copy `models/custom.jso
 separately if using custom poses. Create a fresh `.venv` on Pi; Mac binaries cannot
 be reused on Linux. The Mac does not need to remain running during Pi operation.
 
+## Connect to Google TV
+
+Pair **from the Pi**, using the same Pi account that will run Headwave. ADB stores
+the pairing credentials for that account. Do not copy the Mac's ADB keys.
+
+![Pi pairs with a code, connects on a separate port, and sends TV key events.](docs/diagrams/tv-connection.svg)
+
+### 1. Join the local network
+
+The Pi normally uses Ethernet. Configure Wi-Fi as a lower-priority backup through
+Pi OS/NetworkManager. Headwave uses IP networking and does not configure or select
+network interfaces. Guest networks or client isolation can prevent communication.
+
+Android's guide describes a shared Wi-Fi network. Ethernet on Pi through the same
+LAN should work, but the actual TV and network setup still need verification.
+
+### 2. Enable Wireless debugging on TV
+
+Enable developer options and open **Wireless debugging → Pair using pairing code**.
+Android documents code-based wireless debugging on TV from Android 13; availability
+and menus depend on the manufacturer. Check that the actual TV offers this feature.
+[Android ADB guide](https://developer.android.com/tools/adb#connect-to-a-device-over-wi-fi)
+
+> **Screenshot to add later:** the TV's Wireless debugging menu, without an active pairing code.
+
+### 3. Pair, then connect
+
+Replace the example addresses with the values shown on your TV:
+
+```bash
+headwave pair 192.168.1.50:37123
+# Enter the pairing code when ADB asks.
+headwave connect 192.168.1.50:40877
+headwave devices
+```
+
+**The pairing port and connection port are different.** Read the connection port
+from the main Wireless debugging screen, not the pairing dialog. It can change
+after a restart.
+
+Copy `config.example.json` to `config.local.json` and set the connection endpoint:
+
+```json
+"adb_serial": "192.168.1.50:40877"
+```
+
+### 4. Start TV control
+
+Once the camera and test mode work:
+
+```bash
+headwave run --config config.local.json --live --headless
+```
+
+For custom poses, add `--custom-model models/custom.json`. `--live` enables TV
+commands; `--headless` hides the camera window. Stop with Ctrl+C. Media and volume
+key behavior can vary between TV applications and audio setups.
+
+### Recovery and automatic startup
+
+A camera or ADB failure stops Headwave. Check the address/port, reconnect, then
+restart the application. A timed-out key is not automatically sent again because
+it might already have executed. Automatic port discovery and reconnection are not
+implemented; Ethernet-to-Wi-Fi failover must also be tested on the real system.
+
+After a successful manual test, edit `deploy/headwave.service.example`: replace
+`USER` and paths, use the pairing account, and add an absolute custom-model path if needed.
+
+```bash
+sudo cp deploy/headwave.service.example /etc/systemd/system/headwave.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now headwave
+journalctl -u headwave -f
+```
+
+The template uses `Restart=no`. After fixing a problem, restart manually with
+`sudo systemctl restart headwave`. The account also needs camera access, commonly
+through the Pi OS `video` group.
+
