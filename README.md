@@ -324,3 +324,60 @@ There is no separate activation gesture or automatic volume-key repeat yet.
 We will decide the final gestures and TV actions together; the mappings currently
 in `config.example.json` are provisional test values.
 
+## Training
+
+**We will train later, after choosing the gestures.** The tools are prepared;
+your photos, dataset, test sessions, and measured results will be added afterward.
+
+![Collect labeled landmarks on Mac, build a model, test new sessions, and copy it to Pi.](docs/diagrams/training.svg)
+
+### Hand sign recognition training
+
+#### 1. Learning data collection
+
+Choose the static poses first. A label identifies a pose; it does not automatically
+assign a TV action. For an example class called `MyGesture`:
+
+```bash
+headwave collect --label MyGesture
+headwave collect --label none
+```
+
+Show your hand and press **Space** for each sample. Press `q` to finish. A sample is
+saved only when MediaPipe detects a hand. `none` contains other hand poses that
+should not trigger TV actions.
+
+At least 20 examples per class are required. Collecting 100–200 varied examples is
+a starting suggestion, not a precision guarantee. Vary distance, angle, lighting,
+and background. Use separate collection sessions and record which hands/people
+are represented.
+
+> **Photos to add later:** one clear photo of every selected pose and examples of `none`.
+
+#### 2. What is recorded?
+
+`data/gestures.jsonl` contains one JSON object per line:
+
+| Field | Content |
+|---|---|
+| `label` | The class name, such as `MyGesture` or `none`. |
+| `landmarks` | 21 points with `x`, `y`, and `z`; point 0 is the wrist. |
+
+No photos or videos are stored by collection. Take documentation photos separately.
+The `z` value is a model-estimated depth coordinate, not a measurement in meters.
+
+#### 3. Landmark preprocessing
+
+![21 XYZ landmarks become wrist-relative coordinates, are scaled, and produce 63 values.](docs/diagrams/preprocessing.svg)
+
+`features()` in `custom.py`:
+
+1. Checks for 21 points with three coordinates each.
+2. Subtracts the wrist coordinates from every point.
+3. Divides all values by the largest absolute coordinate value.
+4. Returns 63 normalized numbers: 21 × 3.
+
+This reduces sensitivity to translation and scale. It does not automatically
+normalize rotation or switching between left and right hands. Non-finite values
+and degenerate landmarks are rejected.
+
