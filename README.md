@@ -257,3 +257,70 @@ The template uses `Restart=no`. After fixing a problem, restart manually with
 `sudo systemctl restart headwave`. The account also needs camera access, commonly
 through the Pi OS `video` group.
 
+## How the code works
+
+Recognition chooses a **gesture name and score**. Filtering decides **when it counts**.
+Configuration chooses **which TV key it means**. Changing a key assignment does
+not require retraining the gesture recognizer.
+
+### Files and functions
+
+| File / function | Responsibility |
+|---|---|
+| `cli.config(path)` | Reads JSON, checks settings, and resolves the model path relative to the config file. |
+| `cli.main()` | Parses commands and dispatches camera, collection, training, download, or ADB actions. |
+| `camera.run(config, args)` | Opens the camera, analyzes frames, displays results, collects samples, and dispatches accepted events. |
+| `GestureFilter.__init__()` | Stores thresholds and initializes timing/latch state. |
+| `GestureFilter.update(label, score, now)` | Checks stability, release, and cooldown; returns a gesture name or `None`. |
+| `adb.endpoint(value)` | Validates the host:port format; does not check reachability. |
+| `adb.command(*args, interactive=False)` | Runs ADB with error handling and a timeout: 5 seconds normally, 120 for pairing. |
+| `AdbRemote.__init__(serial)` | Stores one selected TV endpoint. |
+| `AdbRemote.connect()` | Connects, then checks that the selected device reports `device`. |
+| `AdbRemote.send(key)` | Sends a key event to that TV without automatic retries. |
+| `custom.features(points)` | Makes 21 XYZ landmarks wrist-relative and scale-normalized. |
+| `custom.train(source, destination)` | Checks labels/sample counts and saves normalized examples. |
+| `CustomClassifier.__init__(path, max_distance)` | Loads and validates the custom model. |
+| `CustomClassifier.predict(points)` | Compares five nearest examples and rejects unknown poses. |
+
+`__init__.py` marks the Python package. `pyproject.toml` declares dependencies and
+connects the `headwave` command to `cli.main()`.
+
+### The camera loop
+
+For every frame, OpenCV reads pixels and converts BGR to RGB. MediaPipe receives
+an increasing timestamp and processes the frame in `VIDEO` mode. This mode accepts
+camera frames as a timed sequence; it does not require a prerecorded video file.
+
+The default path uses MediaPipe's highest-scoring gesture. Custom mode uses its
+hand landmarks with our classifier instead. Unmapped gestures count as inactive.
+The accepted event is looked up in `config["gestures"]`, then printed in test mode
+or sent through ADB in live mode. ADB calls are synchronous, so frame processing
+waits for each call to finish.
+
+The preview is mirrored only after recognition. Space in collection mode appends
+landmarks and a label; it does not save the camera image. A `finally` block releases
+the camera and closes any preview windows when the loop ends.
+
+### Gesture filtering
+
+![The filter waits for a stable pose, fires once, then requires release before rearming.](docs/diagrams/gesture-filter.svg)
+
+| Setting | Default | Meaning |
+|---|---:|---|
+| `confidence` | 0.75 | Minimum accepted gesture score. |
+| `hold_seconds` | 0.5 | How long the same accepted gesture must remain stable. |
+| `release_seconds` | 0.35 | How long an accepted mapped gesture must be absent to rearm. |
+| `cooldown_seconds` | 1.0 | Minimum interval between events. |
+| `camera` | 0 | Camera index. |
+| `width`, `height` | 640, 480 | Requested capture dimensions; camera support may differ. |
+
+The filter remembers its current candidate, when it started, when acceptable input
+went away, whether an event has latched it, and the last event time. A changed
+candidate restarts the hold timer. After firing, switching directly to another
+mapped pose does not unlock it: no hand, an unmapped pose, or a low score must be
+observed for the release interval. Short tracking dropouts do not rearm it.
+
+There is no separate activation gesture or automatic volume-key repeat yet.
+We will decide the final gestures and TV actions together; the mappings currently
+in `config.example.json` are provisional test values.
+
