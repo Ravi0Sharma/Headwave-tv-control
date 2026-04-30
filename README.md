@@ -434,3 +434,37 @@ not describe Headwave's current kNN classifier. Its standalone `.tflite` classif
 cannot be loaded directly as Gesture Recognizer `.task` bundles. No code or models
 have been copied from that repository.
 
+## Demo: using gestures with the TV
+
+> **Coming later:** your real recording showing a hand gesture and the TV's response
+> in the same shot. No completed Pi/TV demo is available yet.
+
+### Recording outline
+
+1. Show Pi 5, Camera Module 3, and the camera placement.
+2. Show a selected pose and the resulting TV action together.
+3. Hold the pose to demonstrate that the command does not repeat.
+4. Release the hand, then show the next gesture.
+5. Include normal movement that should not trigger the TV.
+
+| Material | Status |
+|---|---|
+| Video showing the hand and TV together | Record later |
+| Pi 5 and camera photo | Add later |
+| Real hand with detected landmarks | Add later |
+| Final gesture/action list and observed behavior | Complete after selection and testing |
+
+Add your own images to `docs/media/`, then insert them here. A video can be linked
+here or uploaded through GitHub's README editor. These filenames are suggestions;
+there are no broken image links to files that do not exist yet.
+
+<!-- Add these only after the real files/video exist:
+![Pi 5 and Camera Module 3](docs/media/hardware.jpg)
+![Detected hand landmarks](docs/media/landmarks.jpg)
+![Hand and TV during the demo](docs/media/tv-demo.jpg)
+[Watch the demo](REAL_VIDEO_URL)
+-->
+
+**Demo environment — fill in later:** TV model/Android version, Pi OS/Python,
+camera variant, distance, lighting, and final gesture mappings.
+
