@@ -381,3 +381,56 @@ This reduces sensitivity to translation and scale. It does not automatically
 normalize rotation or switching between left and right hands. Non-finite values
 and degenerate landmarks are rejected.
 
+#### 4. Build the custom model
+
+After collecting the dataset:
+
+```bash
+headwave train
+```
+
+This reads `data/gestures.jsonl` and writes `models/custom.json`. Here, training
+means preparing and storing examples for a **k-nearest-neighbors classifier**.
+It does not retrain MediaPipe's neural network or export a new TFLite model.
+
+At runtime, a new pose is compared with the five nearest stored samples. Four
+matching votes give a score of 0.8: vote agreement, not guaranteed 80% accuracy.
+The `none` class and poses too far from known examples are rejected.
+`--max-distance` controls the distance limit; lower values reject more poses.
+
+#### 5. Test independent sessions
+
+Add your class labels to `gestures` in the local configuration, then run:
+
+```bash
+headwave run --config config.local.json --custom-model models/custom.json
+```
+
+Custom mode replaces the built-in gesture labels. Collect all poses you want to
+use in that mode. The program does not automatically split training and test data.
+Use new sessions for testing; nearly identical frames from one recording are not
+an independent evaluation. Copy the model to Pi after testing.
+
+#### 6. Results — to be completed after training
+
+| Field | Result |
+|---|---|
+| Selected classes and TV actions | Not decided |
+| Examples per class / collection sessions | Not collected |
+| Independent test sessions | Not performed |
+| Correct / incorrect / rejected poses | Not measured |
+| Unintended TV commands without an intentional gesture | Not measured |
+| Response delay / frame rate on Pi | Not measured |
+
+### Finger gesture recognition: movement over time
+
+The reference repository also classifies fingertip history and includes MLP/LSTM
+examples. Such inputs describe multiple time steps, while a static pose describes
+one frame. Headwave does not yet contain a history model, notebook, or swipe detector.
+
+We will decide later whether movement gestures are needed, which motions to support,
+and how to evaluate them. Neural-layer diagrams from the reference repository do
+not describe Headwave's current kNN classifier. Its standalone `.tflite` classifiers
+cannot be loaded directly as Gesture Recognizer `.task` bundles. No code or models
+have been copied from that repository.
+
