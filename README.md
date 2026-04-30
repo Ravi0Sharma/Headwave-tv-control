@@ -468,3 +468,61 @@ there are no broken image links to files that do not exist yet.
 **Demo environment — fill in later:** TV model/Android version, Pi OS/Python,
 camera variant, distance, lighting, and final gesture mappings.
 
+## Tests and troubleshooting
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+```
+
+The 13 tests cover hold/release timing, cooldown, invalid scores, targeted ADB calls,
+argument validation, no retry after timeout, connection state, normalization,
+classifier storage/rejection, empty training data, dry-run defaults, and model paths.
+ADB is mocked in tests; they do not measure real gesture or TV performance.
+
+| Problem | Check |
+|---|---|
+| `headwave` not found | Activate `.venv` and install the project. |
+| Mac camera will not open | Camera permission, camera index, and other apps using it. |
+| `NSOpenGLPixelFormat` | Run in a normal terminal; sandboxing can block Mac graphics initialization even with CPU selected. |
+| Model missing | Run `headwave download-model`; model paths are relative to the configuration file. |
+| A new pose produces no new key | Release for at least 0.35 seconds; directly changing mapped poses does not rearm. |
+| Custom poses are rejected | Check labels, mappings, sample variety, scores, and distance threshold. |
+| Camera Module 3 works with rpicam but not Headwave | The Picamera2 adapter is not implemented yet. |
+| ADB missing | Install ADB on Pi; Mac dry-run mode does not need it. |
+| Pairing works but connection fails | Use the current connection port, not the pairing port. |
+| TV stops responding after network change | Check reachability/port, reconnect, and restart Headwave. |
+
+**Verified:** 13 automated tests pass; the official model processed a synthetic
+frame on Apple M4; camera preview was started on Mac in dry-run mode.
+
+**Pending:** Camera Module 3 integration, Pi performance, real TV pairing/key behavior,
+network failover, custom training/evaluation, final gesture assignments, and demo recording.
+
+## Diagrams, inspiration, and sources
+
+Diagrams use [Diagram Design](https://github.com/cathrynlavery/diagram-design) by
+Cathryn Lavery: light background, dark text, and orange emphasis. Its skill and
+template were read from revision `ce9344c52cb9be811de187bf2a6d58c712c9c9fe`.
+
+The figures use architecture/data-flow, sequence, and state-machine layouts at
+960 × 600. Overview figures omit detailed API calls and failure branches, which
+are explained in this README. HTML is the source artifact; SVG is extracted for
+README embedding. Rebuild with:
+
+```bash
+python3 scripts/build_diagrams.py
+```
+
+Geist, Geist Mono, and Instrument Serif load through Google Fonts in a browser.
+Offline viewers and GitHub image embedding may use the included font fallbacks.
+The [template's MIT license](docs/diagrams/THIRD_PARTY_LICENSE.txt) is retained.
+
+- [Gesture-recognition reference repository](https://github.com/Kazuhito00/hand-gesture-recognition-using-mediapipe/blob/main/README_EN.md): inspiration for landmark collection and analysis.
+- [MediaPipe Gesture Recognizer](https://developers.google.com/edge/mediapipe/solutions/vision/gesture_recognizer/python): official API and built-in gestures.
+- [MediaPipe Python setup](https://developers.google.com/edge/mediapipe/solutions/setup_python): platform setup.
+- [MediaPipe 0.10.18 packages](https://pypi.org/project/mediapipe/0.10.18/#files): installation files.
+- [Official Raspberry Pi example](https://github.com/google-ai-edge/mediapipe-samples/tree/main/examples/gesture_recognizer/raspberry_pi): reference application.
+- [MediaPipe Model Maker](https://developers.google.com/edge/mediapipe/solutions/customization/gesture_recognizer): alternative custom `.task` training; no longer actively maintained and not a project dependency.
+
+Project code: [MIT license](LICENSE). Third-party libraries and model files retain
+their respective publishers' licenses.
