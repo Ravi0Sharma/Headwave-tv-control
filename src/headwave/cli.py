@@ -14,13 +14,15 @@ MODEL_URL = "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/
 
 def config(path):
     data = json.loads(Path(path).read_text())
-    for name, default in [("confidence", .75), ("hold_seconds", .5),
-                          ("release_seconds", .35), ("cooldown_seconds", 1.)]:
+    for name, default in [("confidence", .75), ("hold_seconds", .18),
+                          ("release_seconds", .15), ("cooldown_seconds", .25)]:
         value = data.setdefault(name, default)
         if not isinstance(value, (float, int)) or not math.isfinite(value) or value <= 0:
             raise ValueError(f"{name} must be a positive finite number")
     if data["confidence"] > 1:
         raise ValueError("confidence must be <= 1")
+    if type(data.setdefault("switch_without_release", True)) is not bool:
+        raise ValueError("switch_without_release must be true or false")
     for name, default in [("width", 640), ("height", 480)]:
         value = data.setdefault(name, default)
         if type(value) is not int or value <= 0:

@@ -12,8 +12,8 @@ from headwave.filter import GestureFilter
 
 
 class FilterTests(unittest.TestCase):
-    def test_hold_and_release(self):
-        gate = GestureFilter()
+    def test_hold_and_release_strict_mode(self):
+        gate = GestureFilter(hold=.5, release=.35, cooldown=1, switch_without_release=False)
         self.assertIsNone(gate.update("Open_Palm", .9, 0))
         self.assertIsNone(gate.update("Open_Palm", .9, .49))
         self.assertEqual(gate.update("Open_Palm", .9, .51), "Open_Palm")
@@ -23,6 +23,43 @@ class FilterTests(unittest.TestCase):
         gate.update(None, 0, 12.36)
         gate.update("Victory", .9, 13)
         self.assertEqual(gate.update("Victory", .9, 13.51), "Victory")
+
+    def test_direct_switch_accepts_new_stable_pose(self):
+        gate = GestureFilter()
+        gate.update("Open_Palm", .9, 0)
+        self.assertEqual(gate.update("Open_Palm", .9, .19), "Open_Palm")
+        self.assertIsNone(gate.update("Victory", .9, .27))
+        self.assertIsNone(gate.update("Victory", .9, .44))
+        self.assertEqual(gate.update("Victory", .9, .46), "Victory")
+        self.assertIsNone(gate.update("Victory", .9, 10))
+
+    def test_direct_switch_still_obeys_global_cooldown(self):
+        gate = GestureFilter()
+        gate.update("Open_Palm", .9, 0)
+        gate.update("Open_Palm", .9, .19)
+        gate.update("Victory", .9, .20)
+        self.assertIsNone(gate.update("Victory", .9, .39))
+        self.assertEqual(gate.update("Victory", .9, .45), "Victory")
+
+    def test_pose_flicker_cannot_accumulate_hold_time(self):
+        gate = GestureFilter()
+        gate.update("Open_Palm", .9, 0)
+        gate.update("Open_Palm", .9, .19)
+        gate.update("Victory", .9, .30)
+        gate.update("Open_Palm", .9, .40)
+        self.assertIsNone(gate.update("Victory", .9, .41))
+        self.assertIsNone(gate.update("Victory", .9, .58))
+        self.assertEqual(gate.update("Victory", .9, .60), "Victory")
+
+    def test_same_pose_requires_release_even_in_fast_mode(self):
+        gate = GestureFilter()
+        gate.update("Open_Palm", .9, 0)
+        gate.update("Open_Palm", .9, .19)
+        self.assertIsNone(gate.update("Open_Palm", .9, 1))
+        gate.update(None, 0, 1.1)
+        gate.update(None, 0, 1.26)
+        self.assertIsNone(gate.update("Open_Palm", .9, 1.3))
+        self.assertEqual(gate.update("Open_Palm", .9, 1.49), "Open_Palm")
 
     def test_noise_breaks_hold_but_short_dropout_does_not_rearm(self):
         gate = GestureFilter()
@@ -111,6 +148,22 @@ class CliTests(unittest.TestCase):
 
     def test_model_path(self):
         self.assertEqual(config("config.example.json")["model"], str(Path("models/gesture_recognizer.task").resolve()))
+
+    def test_switch_setting_rejects_string_false(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "config.json"
+            path.write_text(json.dumps({"gestures": {}, "switch_without_release": "false"}))
+            with self.assertRaises(ValueError):
+                config(path)
+
+    def test_old_config_keeps_explicit_timing_values(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "config.json"
+            path.write_text(json.dumps({"gestures": {}, "hold_seconds": .8}))
+            settings = config(path)
+            self.assertEqual(settings["hold_seconds"], .8)
+            self.assertEqual(settings["cooldown_seconds"], .25)
+            self.assertTrue(settings["switch_without_release"])
 
 
 if __name__ == "__main__":

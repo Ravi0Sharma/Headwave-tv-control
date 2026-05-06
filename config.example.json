@@ -4,9 +4,10 @@
   "width": 640,
   "height": 480,
   "confidence": 0.75,
-  "hold_seconds": 0.5,
-  "release_seconds": 0.35,
-  "cooldown_seconds": 1.0,
+  "hold_seconds": 0.18,
+  "release_seconds": 0.15,
+  "cooldown_seconds": 0.25,
+  "switch_without_release": true,
   "adb_serial": "",
   "gestures": {
     "Open_Palm": "KEYCODE_MEDIA_PLAY_PAUSE",
