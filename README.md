@@ -4,13 +4,13 @@ Control Chromecast with Google TV using static hand gestures. A camera detects t
 gesture, Raspberry Pi translates it into a command, and ADB sends the command to
 the TV.
 
+## Diagram
 ![Camera frames pass through MediaPipe, filtering, key mapping, and ADB to Google TV.](docs/diagrams/pipeline.svg)
 
 ## Hardware
 
 - **Raspberry Pi 5** runs gesture recognition and sends TV commands.
 - **Camera Module 3** captures the user's hand and connects directly to the Pi.
-  The current code needs a Picamera2 adapter before this camera can be used.
 - **Chromecast with Google TV** receives commands over the local network through
   Wireless debugging.
 
@@ -79,6 +79,8 @@ Headwave after changing code or configuration. Dry-run mode does not contact the
 
 ## Add and train hand gestures
 
+![Collect gesture samples, train a model, test it, and copy it to Raspberry Pi.](docs/diagrams/training.svg)
+
 ### 1. Collect samples
 
 Create samples for every gesture and a `none` class for poses that should do
@@ -129,7 +131,3 @@ control on the Pi:
 headwave run --config config.local.json \
   --custom-model models/custom.json --live --headless
 ```
-
-## License
-
-[MIT](LICENSE)
