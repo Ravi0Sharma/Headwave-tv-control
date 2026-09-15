@@ -97,31 +97,14 @@ required for each label.
 #### Hand landmark table
 
 MediaPipe detects 21 points on the hand. Each point contains `x`, `y`, and `z`,
-giving **63 coordinate values per sample**.
+giving **63 coordinate values per sample**. **Point 0 is the wrist.**
 
-| Point | Hand landmark |
-|---|---|
-| 0 | Wrist |
-| 1 | Thumb base (CMC) |
-| 2 | Thumb knuckle (MCP) |
-| 3 | Thumb joint (IP) |
-| 4 | Thumb tip |
-| 5 | Index finger knuckle (MCP) |
-| 6 | Index finger middle joint (PIP) |
-| 7 | Index finger joint nearest the tip (DIP) |
-| 8 | Index finger tip |
-| 9 | Middle finger knuckle (MCP) |
-| 10 | Middle finger middle joint (PIP) |
-| 11 | Middle finger joint nearest the tip (DIP) |
-| 12 | Middle finger tip |
-| 13 | Ring finger knuckle (MCP) |
-| 14 | Ring finger middle joint (PIP) |
-| 15 | Ring finger joint nearest the tip (DIP) |
-| 16 | Ring finger tip |
-| 17 | Little finger knuckle (MCP) |
-| 18 | Little finger middle joint (PIP) |
-| 19 | Little finger joint nearest the tip (DIP) |
-| 20 | Little finger tip |
+| Thumb | Index finger | Middle finger | Ring finger | Little finger |
+|---|---|---|---|---|
+| **1** · Base | **5** · Knuckle | **9** · Knuckle | **13** · Knuckle | **17** · Knuckle |
+| **2** · Knuckle | **6** · Middle joint | **10** · Middle joint | **14** · Middle joint | **18** · Middle joint |
+| **3** · Joint | **7** · Joint near tip | **11** · Joint near tip | **15** · Joint near tip | **19** · Joint near tip |
+| **4** · Tip | **8** · Tip | **12** · Tip | **16** · Tip | **20** · Tip |
 
 #### Training data example
 
