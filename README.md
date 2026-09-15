@@ -79,10 +79,6 @@ Set `switch_without_release` to `false` to require release before every new even
 Increase hold/cooldown times if accidental pose changes trigger commands. Restart
 Headwave after changing code or configuration. Dry-run mode does not contact the TV.
 
-## Add and train hand gestures
-
-![Collect gesture samples, train a model, test it, and copy it to Raspberry Pi.](docs/diagrams/training.svg)
-
 ### 1. Collect samples
 
 Create samples for every gesture and a `none` class for poses that should do
@@ -97,6 +93,54 @@ headwave collect --label none
 Press Space to save a detected hand and `q` to finish. Record each gesture from
 different angles, distances, and lighting conditions. At least 20 samples are
 required for each label.
+
+#### Hand landmark table
+
+MediaPipe detects 21 points on the hand. Each point contains `x`, `y`, and `z`,
+giving **63 coordinate values per sample**.
+
+| Point | Hand landmark |
+|---|---|
+| 0 | Wrist |
+| 1 | Thumb base (CMC) |
+| 2 | Thumb knuckle (MCP) |
+| 3 | Thumb joint (IP) |
+| 4 | Thumb tip |
+| 5 | Index finger knuckle (MCP) |
+| 6 | Index finger middle joint (PIP) |
+| 7 | Index finger joint nearest the tip (DIP) |
+| 8 | Index finger tip |
+| 9 | Middle finger knuckle (MCP) |
+| 10 | Middle finger middle joint (PIP) |
+| 11 | Middle finger joint nearest the tip (DIP) |
+| 12 | Middle finger tip |
+| 13 | Ring finger knuckle (MCP) |
+| 14 | Ring finger middle joint (PIP) |
+| 15 | Ring finger joint nearest the tip (DIP) |
+| 16 | Ring finger tip |
+| 17 | Little finger knuckle (MCP) |
+| 18 | Little finger middle joint (PIP) |
+| 19 | Little finger joint nearest the tip (DIP) |
+| 20 | Little finger tip |
+
+#### Training data example
+
+Each collected sample stores a gesture label and the 21 points in
+`data/gestures.jsonl`. During training, `features()` subtracts the wrist position
+and divides all coordinates by the largest absolute value. The wrist becomes
+`(0, 0, 0)`, reducing the effect of hand position and scale.
+
+The table below shows **illustrative normalized values, not recorded training
+results**. Only three of the 21 points are shown to keep it readable.
+
+| Example label | Wrist: point 0 `(x, y, z)` | Thumb tip: point 4 `(x, y, z)` | Index tip: point 8 `(x, y, z)` |
+|---|---|---|---|
+| `PlayPause` | `(0.00, 0.00, 0.00)` | `(0.35, -0.40, -0.10)` | `(0.25, -1.00, -0.08)` |
+| `VolumeUp` | `(0.00, 0.00, 0.00)` | `(0.20, -1.00, -0.05)` | `(0.40, -0.45, -0.20)` |
+
+Headwave saves raw samples as JSONL and normalized examples in `models/custom.json`.
+This table is a readable explanation of those values; no CSV file is generated.
+The `z` coordinate is estimated by the model, not measured in meters.
 
 ### 2. Train the model
 
