@@ -31,11 +31,6 @@ in `config.example.json` and can be changed:
 | `Pointing_Up` | Index finger pointing up | Navigate up |
 | `ILoveYou` | I-love-you hand sign | Home |
 
-Copy the example before changing the gesture assignments:
-
-```bash
-cp config.example.json config.local.json
-```
 
 The gesture files are:
 
@@ -55,18 +50,11 @@ The generated model, training data, and local configuration are ignored by Git.
 headwave run
 ```
 
-The preview uses black text on a white header. It shows the current gesture,
-the last accepted event, processing FPS, and MediaPipe inference time in milliseconds.
-Frames are resized to fit the configured width/height before analysis if the camera
-ignores the requested capture size. Buffer reduction is best effort and depends on
-the camera backend.
-
 The default filter accepts a stable pose after 0.18 seconds and allows at most one
-event every 0.25 seconds. You can switch directly to a different stable pose.
-Holding the same pose does not repeat it; release for 0.15 seconds to use that same
-pose again. Actual response also includes frame capture and model processing time.
+event every 0.25 seconds.  Holding the same pose does not repeat it; release for 0.15 seconds 
+to use that same pose again. 
 
-If you already use `config.local.json`, update its timing values too:
+ `config.local.json`, updatea timing values:
 
 ```json
 "hold_seconds": 0.18,
@@ -76,8 +64,8 @@ If you already use `config.local.json`, update its timing values too:
 ```
 
 Set `switch_without_release` to `false` to require release before every new event.
-Increase hold/cooldown times if accidental pose changes trigger commands. Restart
-Headwave after changing code or configuration. Dry-run mode does not contact the TV.
+Increase hold/cooldown times if accidental pose changes trigger commands. 
+Dry-run mode does not contact the TV.
 
 ### 1. Collect samples
 
