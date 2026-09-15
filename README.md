@@ -16,6 +16,8 @@ the TV.
 
 ## Hand gestures
 
+[Watch the hand gesture demo](docs/media/handGestures.mov)
+
 The built-in MediaPipe model recognizes these gestures. Their TV commands are set
 in `config.example.json` and can be changed:
 
