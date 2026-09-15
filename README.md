@@ -4,6 +4,8 @@ Control Chromecast with Google TV using static hand gestures. A camera detects t
 gesture, Raspberry Pi translates it into a command, and ADB sends the command to
 the TV.
 
+![Camera frames pass through MediaPipe, filtering, key mapping, and ADB to Google TV.](docs/diagrams/pipeline.svg)
+
 ## Hardware
 
 - **Raspberry Pi 5** runs gesture recognition and sends TV commands.
@@ -11,6 +13,39 @@ the TV.
   The current code needs a Picamera2 adapter before this camera can be used.
 - **Chromecast with Google TV** receives commands over the local network through
   Wireless debugging.
+
+## Hand gestures
+
+The built-in MediaPipe model recognizes these gestures. Their TV commands are set
+in `config.example.json` and can be changed:
+
+| Gesture label | Hand pose | Example TV command |
+|---|---|---|
+| `Open_Palm` | Open hand | Play/pause |
+| `Closed_Fist` | Closed fist | Select/OK |
+| `Thumb_Up` | Thumb up | Volume up |
+| `Thumb_Down` | Thumb down | Volume down |
+| `Victory` | Two-finger V sign | Back |
+| `Pointing_Up` | Index finger pointing up | Navigate up |
+| `ILoveYou` | I-love-you hand sign | Home |
+
+Copy the example before changing the gesture assignments:
+
+```bash
+cp config.example.json config.local.json
+```
+
+The gesture files are:
+
+| File | Purpose |
+|---|---|
+| `config.example.json` | Example camera settings and gesture-to-command mappings |
+| `config.local.json` | Personal settings and final gesture mappings |
+| `models/gesture_recognizer.task` | Downloaded MediaPipe model for built-in gestures |
+| `data/gestures.jsonl` | Collected landmarks and labels for custom gestures |
+| `models/custom.json` | Custom model created by `headwave train` |
+
+The generated model, training data, and local configuration are ignored by Git.
 
 ## Add and train hand gestures
 
