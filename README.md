@@ -18,8 +18,7 @@ the TV.
 
 [![Hand gesture demo](docs/media/handGestures-preview.gif)](docs/media/handGestures.mov)
 
-The built-in MediaPipe model recognizes these gestures. Their TV commands are set
-in `config.example.json`:
+The built-in MediaPipe model recognizes these gestures.
 
 | Gesture label | Hand pose | Example TV command |
 |---|---|---|
