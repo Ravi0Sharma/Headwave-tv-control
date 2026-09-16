@@ -19,7 +19,7 @@ the TV.
 [![Hand gesture demo](docs/media/handGestures-preview.gif)](docs/media/handGestures.mov)
 
 The built-in MediaPipe model recognizes these gestures. Their TV commands are set
-in `config.example.json` and can be changed:
+in `config.example.json`:
 
 | Gesture label | Hand pose | Example TV command |
 |---|---|---|
@@ -42,7 +42,7 @@ The gesture files are:
 | `data/gestures.jsonl` | Collected landmarks and labels for custom gestures |
 | `models/custom.json` | Custom model created by `headwave train` |
 
-The generated model, training data, and local configuration are ignored by Git.
+The generated model, training data and local configuration are ignored by Git.
 
 ### Camera preview and response time
 
@@ -79,7 +79,7 @@ headwave collect --label none
 ```
 
 Press Space to save a detected hand and `q` to finish. Record each gesture from
-different angles, distances, and lighting conditions. At least 20 samples are
+different angles, distances and lighting conditions. At least 20 samples are
 required for each label.
 
 #### Hand landmark table
