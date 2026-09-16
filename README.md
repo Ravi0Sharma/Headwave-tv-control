@@ -1,7 +1,7 @@
 # Headwave TV Control
 
 Control Chromecast with Google TV using static hand gestures. A camera detects the
-gesture, Raspberry Pi translates it into a command, and ADB sends the command to
+gesture, Raspberry Pi translates it into a command and ADB sends the command to
 the TV.
 
 ## Diagram
